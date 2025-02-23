@@ -1,12 +1,12 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "strings"
-    "time"
+	"fmt"
+	"log"
+	"strings"
+	"time"
 
-    "github.com/gocolly/colly/v2"
+	"github.com/gocolly/colly/v2"
 )
 
 type HackerNewsItem struct {
@@ -16,10 +16,11 @@ type HackerNewsItem struct {
 }
 
 func main() {
-    // Create a new collector with rate limiting
+    // Create a new collector with rate limiting and configuration
     c := colly.NewCollector(
         colly.AllowURLRevisit(),
         colly.Async(true),
+        colly.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"),
     )
 
     // Add rate limiting
@@ -28,7 +29,7 @@ func main() {
         Parallelism: 2,
         Delay:       1 * time.Second,
     })
-
+    
     // Set up scraping logic here
     c.OnHTML(".titleline", func(e *colly.HTMLElement) {
         item := HackerNewsItem{}
