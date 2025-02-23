@@ -16,7 +16,7 @@ This project is a web scraper built using Go and the Colly library. It is design
 1. Clone the repository:
 
    ```
-   git clone [<repository-url>](https://github.com/niels-demeyer/go_hackernews)
+   git clone https://github.com/niels-demeyer/go_hackernews
    cd go-scraper
    ```
 
