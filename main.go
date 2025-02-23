@@ -16,6 +16,13 @@ type HackerNewsItem struct {
 }
 
 func main() {
+    // Initialize database
+    database, err := InitDB("hackernews.db")
+    if err != nil {
+        log.Fatal("Failed to initialize database:", err)
+    }
+    defer database.Close()
+
     // Create a new collector with rate limiting and configuration
     c := colly.NewCollector(
         colly.AllowURLRevisit(),
@@ -29,23 +36,31 @@ func main() {
         Parallelism: 2,
         Delay:       1 * time.Second,
     })
-    
+
     // Set up scraping logic here
     c.OnHTML(".titleline", func(e *colly.HTMLElement) {
         item := HackerNewsItem{}
-        
+
         // Extract title and URL from the first anchor tag
         titleLink := e.ChildAttr("a", "href")
         titleText := e.ChildText("a")
         item.Title = strings.TrimSpace(titleText)
         item.URL = strings.TrimSpace(titleLink)
-
-        // Extract site information from the sitestr span
         item.Site = strings.TrimSpace(e.ChildText(".sitestr"))
-        
-        // Only print items that have both title and URL
+
+        // Only store items that have both title and URL
         if item.Title != "" && item.URL != "" {
-            fmt.Printf("Title: %s\n", item.Title)
+            err := InsertItem(database, item.Title, item.Site, item.URL)
+            if err != nil {
+                if strings.Contains(err.Error(), "duplicate URL") {
+                    log.Printf("Skipping duplicate: %s\n", item.Title)
+                    return
+                }
+                log.Printf("Error storing item: %v\n", err)
+                return
+            }
+
+            fmt.Printf("Stored: %s\n", item.Title)
             if item.Site != "" {
                 fmt.Printf("Site: %s\n", item.Site)
             }
@@ -74,4 +89,6 @@ func main() {
 
     // Wait for all scraping jobs to complete
     c.Wait()
+
+    println("Job finished")
 }

@@ -31,7 +31,7 @@ This project is a web scraper built using Go and the Colly library. It is design
 To run the scraper, execute the following command:
 
 ```
-go run main.go
+go run *.go
 ```
 
 ### Contributing
